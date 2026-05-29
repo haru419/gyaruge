@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>放課後の出会い</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Yu Gothic",sans-serif;
+}
+
+body{
+    background:#111;
+    overflow:hidden;
+}
+
+#game{
+    width:100vw;
+    height:100vh;
+    position:relative;
+}
+
+#bg{
+    position:absolute;
+    width:100%;
+    height:100%;
+    background:
+    linear-gradient(rgba(0,0,0,.2),rgba(0,0,0,.2)),
+    url("https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=1600");
+    background-size:cover;
+    background-position:center;
+}
+
+#character{
+    position:absolute;
+    bottom:0;
+    left:50%;
+    transform:translateX(-50%);
+    width:350px;
+    transition:.3s;
+}
+
+#character img{
+    width:100%;
+}
+
+#textbox{
+    position:absolute;
+    bottom:0;
+    width:100%;
+    background:rgba(0,0,0,.75);
+    color:white;
+    padding:25px;
+}
+
+#name{
+    font-size:24px;
+    font-weight:bold;
+    color:#ff9de1;
+    margin-bottom:10px;
+}
+
+#text{
+    min-height:80px;
+    font-size:20px;
+    line-height:1.6;
+}
+
+#next{
+    margin-top:15px;
+    padding:10px 25px;
+    background:#ff69b4;
+    color:white;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:18px;
+}
+
+#choices{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    margin-top:15px;
+}
+
+.choice{
+    padding:12px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    background:white;
+    font-size:16px;
+}
+
+#ending{
+    position:absolute;
+    inset:0;
+    background:rgba(0,0,0,.95);
+    color:white;
+    display:none;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+    font-size:32px;
+    text-align:center;
+}
+
+#ending button{
+    margin-top:20px;
+    padding:12px 25px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+}
+</style>
+</head>
+<body>
+
+<div id="game">
+
+<div id="bg"></div>
+
+<div id="character">
+<img src="https://i.imgur.com/0y0y0y0.png"
+onerror="this.src='https://cdn-icons-png.flaticon.com/512/6997/6997662.png'">
+</div>
+
+<div id="textbox">
+    <div id="name"></div>
+    <div id="text"></div>
+
+    <div id="choices"></div>
+
+    <button id="next">▶ 次へ</button>
+</div>
+
+<div id="ending">
+    <h1 id="endingText"></h1>
+    <button onclick="location.reload()">もう一度遊ぶ</button>
+</div>
+
+</div>
+
+<script>
+
+let affection = 0;
+let scene = 0;
+
+const story = [
+
+{
+name:"美咲",
+text:"あっ…！同じクラスの人だよね？"
+},
+
+{
+name:"美咲",
+text:"放課後って暇だったりする？"
+},
+
+{
+choice:true,
+options:[
+{
+text:"暇だよ",
+value:10
+},
+{
+text:"忙しいかな",
+value:-5
+}
+]
+},
+
+{
+name:"美咲",
+text:"じゃあ、一緒に帰らない？"
+},
+
+{
+choice:true,
+options:[
+{
+text:"もちろん！",
+value:10
+},
+{
+text:"遠慮しておく",
+value:-10
+}
+]
+},
+
+{
+name:"美咲",
+text:"実は前から少し気になってたんだ。"
+},
+
+{
+choice:true,
+options:[
+{
+text:"俺も気になってた",
+value:15
+},
+{
+text:"そうなんだ",
+value:0
+}
+]
+}
+
+];
+
+const nameBox = document.getElementById("name");
+const textBox = document.getElementById("text");
+const nextBtn = document.getElementById("next");
+const choices = document.getElementById("choices");
+
+function showScene(){
+
+if(scene >= story.length){
+ending();
+return;
+}
+
+const data = story[scene];
+
+if(data.choice){
+
+nextBtn.style.display="none";
+nameBox.textContent="選択";
+
+choices.innerHTML="";
+
+data.options.forEach(option=>{
+
+const btn=document.createElement("button");
+
+btn.className="choice";
+btn.textContent=option.text;
+
+btn.onclick=()=>{
+
+affection += option.value;
+
+choices.innerHTML="";
+scene++;
+
+nextBtn.style.display="inline-block";
+
+showScene();
+};
+
+choices.appendChild(btn);
+});
+
+textBox.textContent="どう答える？";
+
+}else{
+
+nameBox.textContent=data.name;
+textBox.textContent=data.text;
+}
+}
+
+function ending(){
+
+document.getElementById("textbox").style.display="none";
+
+const end=document.getElementById("ending");
+
+end.style.display="flex";
+
+if(affection >= 25){
+
+document.getElementById("endingText").innerHTML=
+"💕 TRUE END<br><br>『私、あなたのこと好きかも。』";
+
+}else if(affection >= 10){
+
+document.getElementById("endingText").innerHTML=
+"🌸 NORMAL END<br><br>友達として仲良くなった";
+
+}else{
+
+document.getElementById("endingText").innerHTML=
+"💔 BAD END<br><br>距離は縮まらなかった";
+}
+}
+
+nextBtn.onclick=()=>{
+scene++;
+showScene();
+};
+
+showScene();
+
+</script>
+
+</body>
+</html>
